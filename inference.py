@@ -88,10 +88,9 @@ class FRCNNRecognitionInference(PlatesRecognitionInference):
         self.detection_model = torch.load(self.inference_config['detection_model'], map_location=self.inference_config['device']) \
            .to(self.inference_config['device']).eval()
         self.ocr_model = easyocr.Reader(**self.inference_config['ocr_model'])
-
+   
+    
     def preprocces_image(self, img):
-        self.img_shape = img.shape[:2]
-        img = cv2.resize(img, (640, 640))
         if self.detection_transform is not None:
             img = self.detection_transform(img)
         img = transforms.ToTensor()(img)
@@ -110,34 +109,34 @@ class FRCNNRecognitionInference(PlatesRecognitionInference):
 
     @torch.no_grad()
     def predict_image(self, img_path, visualize=False):
-
+        
         img = self.load_image(img_path)
         torch_img = self.preprocces_image(img).to(self.inference_config['device'])
-        texts = []
-        bboxes = self.detect_plates(torch_img)
-        if bboxes is not None:
-            for bbox in bboxes:
-                img_crop = img[bbox[1]:bbox[3], bbox[0]:bbox[2]]
-                texts.append(self.recognized_plates(img_crop))
+        bbox = self.detect_plates(torch_img)
+        if bbox is not None:
+            img_crop = img[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+            try:
+                text = self.recognized_plates(img_crop)
+            except:
+                text = '';
         else:
-            texts = ''
+            text = ''
         if visualize:
-            return img, bboxes, texts
+            return img, bbox, text
         else:
-            return texts
+            return text
 
     def visualize_image(self, img_path):
 
-        img, bboxes, text = self.predict_image(img_path, visualize=True)
+        img, bbox, text = self.predict_image(img_path, visualize=True)
 
         print('Recognized text:', text)
         fig, ax = plt.subplots(figsize=(20, 17))
         ax.imshow(img)
-        for bbox in bboxes:
-            rect = Rectangle((bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
-                             linewidth=3, edgecolor='r', facecolor='none')
+        rect = Rectangle((bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
+                         linewidth=3, edgecolor='r', facecolor='none')
 
-            ax.add_patch(rect)
+        ax.add_patch(rect)
 
     def predict_img_list(self, img_list):
 
