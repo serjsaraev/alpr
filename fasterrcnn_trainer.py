@@ -5,12 +5,13 @@ import pandas as pd
 
 from custom_metrics import get_iou
 from sklearn.metrics import auc
+from torchvision.models.detection import fasterrcnn_resnet50_fpn
 
 
 class ModelTrainer:
 
-    def __init__(self, model, model_name, train_loader, val_loader, optimizer, device, scheduller=None,
-                 conf_thresh=0.5, val_classes=None):
+    def __init__(self, model, model_name, train_loader, val_loader, optimizer, device,  run, scheduller=None,
+                 conf_thresh=0.5, val_classes=None,):
 
         self.model = model
         self.model_name = model_name
@@ -22,6 +23,12 @@ class ModelTrainer:
 
         self.conf_thresh = conf_thresh
         self.val_classes = val_classes
+        self.run = run
+
+        self.best_map05 = 0
+        self.best_map0595 = 0
+        self.best_precision = 0
+        self.best_recall = 0
 
     def fit_epoch(self):
 
@@ -56,6 +63,11 @@ class ModelTrainer:
                 print('Global Loss:', np.mean(global_loss))
                 print('Object Loss:', np.mean(obj_loss))
                 print('Reg Loss:', np.mean(reg_loss))
+            self.run.log({
+                "train/obj_loss": np.mean(obj_loss),
+                "train/box_loss": np.mean(reg_loss),
+                "train/global_loss": np.mean(global_loss)
+            })
 
         return np.mean(global_loss)
 
@@ -187,6 +199,25 @@ class ModelTrainer:
             answers.extend(targets)
         print(predictions)
         result = self.compute_metrics(predictions, answers)
+        self.run.log({
+            "metrics/mAP_0.5": result['map@50'],
+            "metrics/mAP_0.5:0.95": result['map@50_95'],
+            "metrics/recall": result['recall'],
+            "metrics/precision": result['precision']
+        })
+        if result['map@50'] > self.best_map05:
+            self.best_map05 = result['map@50']
+            self.run.summary['best/mAP_0.5'] = self.best_map05
+        if result['map@50_95'] > self.best_map0595:
+            self.best_map0595 = result['map@50_95']
+            self.run.summary['best/mAP_0.5:0.95'] = self.best_map0595
+        if result['recall'] > self.best_recall:
+            self.best_recall = result['recall']
+            self.run.summary['best/recall'] = self.best_recall
+        if result['precision'] > self.best_precision:
+            self.best_precision = result['precision']
+            self.run.summary['best/precision'] = self.best_precision
+        self.run.summary.update()
 
         return result
 
@@ -211,3 +242,4 @@ class ModelTrainer:
             print('Recall:', result_metrics['recall'])
             print('MAP@50:', result_metrics['map@50'])
             print('MAP@50_95:', result_metrics['map@50_95'])
+            self.run.finish()
