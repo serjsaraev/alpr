@@ -207,16 +207,16 @@ class ModelTrainer:
         }, step=epoch)
         if result['map@50'] > self.best_map05:
             self.best_map05 = result['map@50']
-            self.run.summary['best/mAP_0.5'] = self.best_map05
         if result['map@50_95'] > self.best_map0595:
             self.best_map0595 = result['map@50_95']
-            self.run.summary['best/mAP_0.5:0.95'] = self.best_map0595
         if result['recall'] > self.best_recall:
             self.best_recall = result['recall']
-            self.run.summary['best/recall'] = self.best_recall
         if result['precision'] > self.best_precision:
             self.best_precision = result['precision']
-            self.run.summary['best/precision'] = self.best_precision
+        self.run.summary['best/mAP_0.5'] = self.best_map05
+        self.run.summary['best/mAP_0.5:0.95'] = self.best_map0595
+        self.run.summary['best/recall'] = self.best_recall
+        self.run.summary['best/precision'] = self.best_precision
         self.run.summary.update()
 
         return result
