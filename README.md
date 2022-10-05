@@ -16,16 +16,23 @@
 
 ### Метрики моделей
 
-FasterRCNN  
+FasterRCNN
 
-Precision=0.907 Recall=0.989 MAP50=0.99 MAP50_95=0.78.
+| Model      | mAP 0.5 | mAP 0.5_0.95 | Precision | Recall |
+|:-----------|:--------|:-------------|:----------|:-------|
+| FasterRCNN | 0.946   | 0.78         | 0.907     | 0.989  |
+
 
 Метрики обучения на каждой эпохе можно посмотреть в 
 [faster_rcnn_v5.txt](Logs/faster_rcnn_v5.txt).
 
 EasyOCR
 
-Best_accuracy: 95.927, Best_norm_ED: 0.9905.
+| Model   | Best_accuracy | Best_norm_ED |
+|:--------|:--------------|:-------------|
+| EasyOCR | 95.927        | 0.9905       | 
+
+
 
 Метрики обучения на каждой эпохе можно посмотреть в 
 [log_train.py](easyocr_trainer/saved_models/alpr_new_filtered/log_train.txt).
