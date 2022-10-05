@@ -30,7 +30,7 @@ class ModelTrainer:
         self.best_precision = 0
         self.best_recall = 0
 
-    def fit_epoch(self):
+    def fit_epoch(self, epoch):
 
         obj_loss = []
         reg_loss = []
@@ -63,11 +63,11 @@ class ModelTrainer:
                 print('Global Loss:', np.mean(global_loss))
                 print('Object Loss:', np.mean(obj_loss))
                 print('Reg Loss:', np.mean(reg_loss))
-            self.run.log({
-                "train/obj_loss": np.mean(obj_loss),
-                "train/box_loss": np.mean(reg_loss),
-                "train/global_loss": np.mean(global_loss)
-            })
+        self.run.log({
+            "train/obj_loss": np.mean(obj_loss),
+            "train/box_loss": np.mean(reg_loss),
+            "train/global_loss": np.mean(global_loss)
+        }, step=epoch)
 
         return np.mean(global_loss)
 
@@ -184,7 +184,7 @@ class ModelTrainer:
         return result_metrics
 
     @torch.no_grad()
-    def eval_epoch(self):
+    def eval_epoch(self, epoch):
 
         self.model.eval()
 
@@ -204,7 +204,7 @@ class ModelTrainer:
             "metrics/mAP_0.5:0.95": result['map@50_95'],
             "metrics/recall": result['recall'],
             "metrics/precision": result['precision']
-        })
+        }, step=epoch)
         if result['map@50'] > self.best_map05:
             self.best_map05 = result['map@50']
             self.run.summary['best/mAP_0.5'] = self.best_map05
@@ -226,8 +226,8 @@ class ModelTrainer:
         best_map = 0
         for epoch in range(1, num_epochs + 1):
 
-            train_loss = self.fit_epoch()
-            result_metrics = self.eval_epoch()
+            train_loss = self.fit_epoch(epoch=epoch)
+            result_metrics = self.eval_epoch(epoch=epoch)
 
             if result_metrics['map@50_95'] >= best_map:
                 best_map = result_metrics['map@50_95']
