@@ -11,6 +11,8 @@
 Для распознавания номеров используется связка ResNet + LSTM + CTC из библиотеки
 [EasyOCR](https://github.com/JaidedAI/EasyOCR).
 
+Скорость инференса ~ 10-11 изображений в секунду.
+
 Для запуска FasterRCNN необходимо добавить веса в папку DetactionModels. 
 Веса можно скачать по ссылке: https://disk.yandex.ru/d/NlvmdsBvbNbltQ .
 
