@@ -30,4 +30,12 @@ Best_accuracy: 95.927, Best_norm_ED: 0.9905.
 Метрики обучения на каждой эпохе можно посмотреть в 
 [log_train.py](easyocr_trainer/saved_models/alpr_new_filtered/log_train.txt).
 
+### Датасаеты
+
+Для обучения использовались следующие датасеты:
+
+1. Kaggle - VKCV 2022 Contest_02
+2. Kaggle - Nomeroff Russian License plates
+
+
 
